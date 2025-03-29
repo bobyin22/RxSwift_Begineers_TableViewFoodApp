@@ -6,23 +6,32 @@
 //
 
 import UIKit
+import RxSwift
+import RxCocoa
 
-class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+class ViewController: UIViewController, UITableViewDelegate {
 
-    let tableViewItems = ["Item 1", "Item 2", "Item 3", "Item 4"]
+    let tableViewItems = Observable.just(["Item 1", "Item 2", "Item 3", "Item 4"])
+    let disposeBag = DisposeBag()
     
     let tableView = UITableView()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         setupTableView()
+        
+        tableViewItems
+            .bind(to: tableView
+                .rx
+                .items(cellIdentifier: "cell")) {
+                      (tv, tableViewItem, cell) in
+                    cell.textLabel?.text = tableViewItem
+                }
+                .disposed(by: disposeBag)
     }
 
     func setupTableView() {
         view.addSubview(tableView)
-
-        tableView.delegate = self
-        tableView.dataSource = self
 
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
 
@@ -34,15 +43,6 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
         ])
     }
-
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return tableViewItems.count
-    }
-
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-        cell.textLabel?.text = tableViewItems[indexPath.row]
-        return cell
-    }
+    
 }
 
