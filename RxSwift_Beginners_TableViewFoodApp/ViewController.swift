@@ -38,18 +38,11 @@ class ViewController: UIViewController, UITableViewDelegate {
             .subscribe(onNext: {
                 foodObject in
                 let detailVC = DetailViewController()
-                detailVC.imageName = foodObject.image
+                //detailVC.imageName = foodObject.image
+                detailVC.imageName.accept(foodObject.image)
                 self.navigationController?.pushViewController(detailVC, animated: true)
             })
             .disposed(by: disposeBag)
-        
-//        tableView
-//            .rx
-//            .itemSelected
-//            .subscribe(onNext: {
-//                indexPath in
-//            })
-//            .disposed(by: disposeBag)
     }
 
     func setupTableView() {
@@ -66,12 +59,5 @@ class ViewController: UIViewController, UITableViewDelegate {
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
         ])
     }
-
-//    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-//        let detailVC = DetailViewController()
-//        detailVC.imageName = "hamburger"
-//        navigationController?.pushViewController(detailVC, animated: true)
-//    }
-    
 }
 

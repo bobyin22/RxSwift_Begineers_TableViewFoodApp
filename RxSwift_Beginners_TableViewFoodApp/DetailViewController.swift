@@ -6,6 +6,8 @@
 //
 
 import UIKit
+import RxSwift
+import RxCocoa
 
 class DetailViewController: UIViewController {
 
@@ -18,7 +20,9 @@ class DetailViewController: UIViewController {
     }()
 
     // 用來接收圖片名稱的屬性
-    var imageName: String = ""
+    //var imageName: String = ""
+    let imageName = BehaviorRelay<String>(value: "")
+    let disposeBag2 = DisposeBag()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -36,6 +40,39 @@ class DetailViewController: UIViewController {
         ])
 
         // 設定圖片
-        foodImageView.image = UIImage(named: imageName)
+        //foodImageView.image = UIImage(named: imageName)
+        imageName
+            .map({
+                name in
+                UIImage(named: name)
+            })
+            .bind(to: foodImageView
+                .rx
+                .image)
+            .disposed(by: disposeBag2)
     }
 }
+
+
+/*
+ // Replay Subject
+ let rSub = ReplaySubject<Int>.create(bufferSize: 3)
+ rSub.onNext(1)
+ rSub.onNext(2)
+ rSub.onNext(3)
+
+ //let ob3 = rSub.subscribe(onNext: { //會印出1 2 3
+ //    elm in
+ //    print(elm)
+ //})
+ 
+ 
+
+ let ob3 = rSub.map({   //會印出2 4 6
+     elem in
+     elem * 2
+ }).subscribe(onNext: {
+     elm in
+     print(elm)
+ })
+ */
