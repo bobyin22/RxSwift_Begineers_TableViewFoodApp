@@ -11,21 +11,25 @@ import RxCocoa
 
 class ViewController: UIViewController, UITableViewDelegate {
 
-    let tableViewItems = Observable.just(["Item 1", "Item 2", "Item 3", "Item 4"])
+    let tableViewItems = Observable.just([Food.init(name: "Hamburger", image: "hamburger"),
+                                          Food.init(name: "Pizza", image: "pizza"),
+                                          Food.init(name: "Salmon", image: "salmon"),
+                                          Food.init(name: "Spaghetti", image: "spaghetti")])
     let disposeBag = DisposeBag()
     
     let tableView = UITableView()
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.title = "Menu"
         setupTableView()
         
-        tableViewItems
-            .bind(to: tableView
+        tableViewItems.bind(to: tableView
                 .rx
-                .items(cellIdentifier: "cell")) {
+            .items(cellIdentifier: "cell", cellType: FoodTableViewCell.self)) {
                       (tv, tableViewItem, cell) in
-                    cell.textLabel?.text = tableViewItem
+                    cell.textLabel?.text = tableViewItem.name
+                    cell.imageView?.image = UIImage(named: tableViewItem.image)
                 }
                 .disposed(by: disposeBag)
     }
@@ -33,8 +37,9 @@ class ViewController: UIViewController, UITableViewDelegate {
     func setupTableView() {
         view.addSubview(tableView)
 
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
-
+        tableView.register(FoodTableViewCell.self, forCellReuseIdentifier: "cell")
+        tableView.delegate = self
+        
         tableView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.topAnchor),
@@ -42,6 +47,12 @@ class ViewController: UIViewController, UITableViewDelegate {
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
         ])
+    }
+
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let detailVC = DetailViewController()
+        detailVC.imageName = "hamburger"
+        navigationController?.pushViewController(detailVC, animated: true)
     }
     
 }
