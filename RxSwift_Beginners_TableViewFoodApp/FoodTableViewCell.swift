@@ -12,7 +12,7 @@ class FoodTableViewCell: UITableViewCell {
     // 建立 UI 元件
     let foodImageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.contentMode = .scaleAspectFill
+        imageView.contentMode = .scaleToFill
         imageView.clipsToBounds = true
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
