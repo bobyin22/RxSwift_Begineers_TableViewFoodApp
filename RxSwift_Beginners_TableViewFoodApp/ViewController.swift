@@ -11,10 +11,10 @@ import RxCocoa
 
 class ViewController: UIViewController, UITableViewDelegate {
 
-    let tableViewItems = Observable.just([Food.init(name: "Hamburger", image: "hamburger"),
-                                          Food.init(name: "Pizza", image: "pizza"),
-                                          Food.init(name: "Salmon", image: "salmon"),
-                                          Food.init(name: "Spaghetti", image: "spaghetti")])
+    let tableViewItems = Observable.just([Food(name: "Hamburger", image: "hamburger"),
+                                          Food(name: "Pizza", image: "pizza"),
+                                          Food(name: "Salmon", image: "salmon"),
+                                          Food(name: "Spaghetti", image: "spaghetti")])
     let disposeBag = DisposeBag()
     
     let tableView = UITableView()
@@ -32,6 +32,24 @@ class ViewController: UIViewController, UITableViewDelegate {
                     cell.imageView?.image = UIImage(named: tableViewItem.image)
                 }
                 .disposed(by: disposeBag)
+        
+        tableView
+            .rx.modelSelected(Food.self)
+            .subscribe(onNext: {
+                foodObject in
+                let detailVC = DetailViewController()
+                detailVC.imageName = foodObject.image
+                self.navigationController?.pushViewController(detailVC, animated: true)
+            })
+            .disposed(by: disposeBag)
+        
+//        tableView
+//            .rx
+//            .itemSelected
+//            .subscribe(onNext: {
+//                indexPath in
+//            })
+//            .disposed(by: disposeBag)
     }
 
     func setupTableView() {
@@ -49,11 +67,11 @@ class ViewController: UIViewController, UITableViewDelegate {
         ])
     }
 
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let detailVC = DetailViewController()
-        detailVC.imageName = "hamburger"
-        navigationController?.pushViewController(detailVC, animated: true)
-    }
+//    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+//        let detailVC = DetailViewController()
+//        detailVC.imageName = "hamburger"
+//        navigationController?.pushViewController(detailVC, animated: true)
+//    }
     
 }
 
