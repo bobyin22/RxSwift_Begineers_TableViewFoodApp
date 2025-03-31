@@ -8,10 +8,12 @@
 import UIKit
 import RxSwift
 import RxCocoa
+import RxDataSources
 
 class ViewController: UIViewController, UITableViewDelegate {
 
-    let tableViewItems = BehaviorRelay.init(value: [Food(name: "Hamburger", image: "hamburger"),
+    let tableViewItemsSectioned = BehaviorRelay.init(value: [
+        SectionModel(header: "Main Course", items: [Food(name: "Hamburger", image: "hamburger"),
                                                     Food(name: "Pizza", image: "pizza"),
                                                     Food(name: "Salmon", image: "salmon"),
                                                     Food(name: "Spaghetti", image: "spaghetti"),
@@ -20,15 +22,30 @@ class ViewController: UIViewController, UITableViewDelegate {
                                                     Food(name: "Salad cheese", image: "salad-cheese"),
                                                     Food(name: "Salad veggy", image: "salad-veg"),
                                                     Food(name: "Ribs", image: "ribs"),
-                                                    Food(name: "Chana masala", image: "chana-masala"),
-                                                    Food(name: "Pancakes", image: "pancakes"),
-                                                    Food(name: "Tiramisu", image: "tiramisu"),
-                                                    Food(name: "Cake", image: "cake")])
+                                                    Food(name: "Chana masala", image: "chana-masala")]),
+        
+        SectionModel(header: "Dessert", items: [Food(name: "Pancakes", image: "pancakes"),
+                                                Food(name: "Tiramisu", image: "tiramisu"),
+                                                Food(name: "Cake", image: "cake")])
+                                                    
+    ])
+    
     let disposeBag = DisposeBag()
     
     let tableView = UITableView()
     let searchBar = UISearchBar()
 
+    let dataSource = RxTableViewSectionedReloadDataSource<SectionModel>(configureCell: {
+        ds, tv, ip, item in
+        let cell: FoodTableViewCell = tv.dequeueReusableCell(withIdentifier: "cell", for: ip) as! FoodTableViewCell
+        cell.textLabel?.text = item.name
+        cell.imageView?.image = UIImage(named: item.image)
+        return cell
+    },
+    titleForHeaderInSection: { ds, index in
+        return ds.sectionModels[index].header
+    })
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
@@ -41,18 +58,17 @@ class ViewController: UIViewController, UITableViewDelegate {
             .distinctUntilChanged()
             .map({
                 query in
-                self.tableViewItems.value.filter({
-                    food in
-                    query.isEmpty || food.name.lowercased().contains(query.lowercased())
+                self.tableViewItemsSectioned.value.map({
+                    sectionModel in
+                    SectionModel(header: sectionModel.header, items: sectionModel.items.filter({
+                        food in
+                        query.isEmpty || food.name.lowercased().contains(query.lowercased())
+                    }))
                 })
             })
             .bind(to: tableView
             .rx
-            .items(cellIdentifier: "cell", cellType: FoodTableViewCell.self)) {
-                      (tv, tableViewItem, cell) in
-                    cell.textLabel?.text = tableViewItem.name
-                    cell.imageView?.image = UIImage(named: tableViewItem.image)
-                }
+            .items(dataSource: dataSource))
             .disposed(by: disposeBag)
         
         tableView
